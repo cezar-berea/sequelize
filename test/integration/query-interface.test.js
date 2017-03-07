@@ -421,6 +421,21 @@ describe(Support.getTestDialectTeaser('QueryInterface'), function() {
         expect(table).to.not.have.property('fruitId');
       });
     });
+
+    it('shows a reasonable error message when column is missing', function() {
+      var self = this;
+      var Users = self.sequelize.define('_Users', {
+        username: DataTypes.STRING
+      }, { freezeTableName: true });
+
+      return Users.sync({ force: true }).then(function() {
+        return self.queryInterface.renameColumn('_Users', 'email', 'pseudo');
+      }).bind(this).then(function() {
+        throw new Error('should not have resolved');
+      }, function(err) {
+        expect(String(err)).to.have.string('Table _Users doesn\'t have the column email');
+      });
+    });
   });
 
   describe('changeColumn', function() {
